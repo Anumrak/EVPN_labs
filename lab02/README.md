@@ -1,10 +1,10 @@
-# Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k.
+# Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k. (IS-IS version)
 Цели
-1) Поднять сетевые интерфейсы между всеми устройствами в рамках указанной топологии.
-2) Создать и поднять loopback интерфейсы на всех устройствах.
-3) Экономно распределить адресное пространство между всеми устройствами и их интерфейсами.
-4) Включить все необходимые сервисы для работы в будущем, такие как ospf, isis, bgp, bfd.
-5) Для удобства распространения маршрутной информации, включить и настроить ospfv2 между Leaf и Spine роутерами.
+1) Очистить RIB от маршрутов известных ранее через протокол OSPF, выключив его в корне настройки.
+2) Создать и поднять протокол IS-IS.
+3) Корректно указать system-id для протокола IS-IS исходя из установки идентификатора "net".
+4) Проверить отображение ожидаемых system-id средствами перотокола IS-IS.
+5) Проверить сетевую связность до всех Loopback адресов.
 # Целевая схема
 ![Снимок](https://github.com/Anumrak/EVPN_labs/assets/133969023/6207ac40-14de-454f-ac56-6adfd13a0d87)
 
@@ -25,162 +25,192 @@ interface Ethernet1/1
   no ip redirects
   ip address 172.16.0.0/31
   no ipv6 redirects
+  no isis hello-padding always
+  isis network point-to-point
+  ip router isis 100
   ip ospf network point-to-point
   no ip ospf passive-interface
   ip router ospf 100 area 0.0.0.0
   no shutdown
 ```
+Команда "no isis hello-padding always" нужна для того, чтобы запретить отправлять с интерфейса hello пакеты с полным mtu, и начать отправлять пакеты с минимально необходимым размером, например всего в 72 байта, для служебной информации работы протокола.
+
 Конфигурация типового процесса ospf на примере роутера Leaf_1
 ```
-router ospf 100
-  router-id 10.0.0.1
-  log-adjacency-changes detail
-  area 0.0.0.0 range 10.0.0.1/32
-  area 0.0.0.0 range 172.16.0.0/31
-  area 0.0.0.0 range 172.16.0.2/31
-  passive-interface default
+router isis 100
+  net 49.0001.0100.0000.0001.00
+  is-type level-1
+  log-adjacency-changes
 ```
-Конфигурация на Spine роутерах аналогична.
+На Spine роутерах конфигурация отличается выбором зоны уровня 1-2, потому что они должны иметь и пересылать все базы данных о маршрутах, как 1го атк и 2го уровней всем.
+По умолчанию, isis процесс работает на уровне 1-2, поэтому этой строчки в конфиге не видно.
 
-### Вывод ospf соседства между всеми устройствами и базы данных состояния каналов.
 ```
-Leaf_1# sh ip ospf neighbors
- OSPF Process ID 100 VRF default
- Total number of neighbors: 2
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.4          1 FULL/ -          02:23:56 172.16.0.1      Eth1/1
- 10.0.0.5          1 FULL/ -          02:07:01 172.16.0.3      Eth1/2
-Leaf_1# sh ip ospf database
-        OSPF Router with ID (10.0.0.1) (Process ID 100 VRF default)
-
-                Router Link States (Area 0.0.0.0)
-
-Link ID         ADV Router      Age        Seq#       Checksum Link Count
-10.0.0.1        10.0.0.1        1282       0x80000010 0xb181   5
-10.0.0.2        10.0.0.2        531        0x8000000b 0xc75d   5
-10.0.0.3        10.0.0.3        534        0x8000000b 0xd33e   5
-10.0.0.4        10.0.0.4        845        0x8000000d 0x28ff   7
-10.0.0.5        10.0.0.5        394        0x8000000b 0x5fbb   7
+router isis 100
+  net 49.0001.0100.0000.0004.00
+  log-adjacency-changes
 ```
+
+### Вывод isis соседства между всеми устройствами и базы данных состояния каналов.
 ```
-Leaf_2# sh ip ospf neighbors
- OSPF Process ID 100 VRF default
- Total number of neighbors: 2
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.4          1 FULL/ -          02:14:46 172.16.0.5      Eth1/1
- 10.0.0.5          1 FULL/ -          02:09:19 172.16.0.7      Eth1/2
-Leaf_2# sh ip ospf database
-        OSPF Router with ID (10.0.0.2) (Process ID 100 VRF default)
+Leaf_1# sh isis 100 adjacency
+IS-IS process: 100 VRF: default
+IS-IS adjacency database:
+Legend: '!': No AF level connectivity in given topology
+System ID       SNPA            Level  State  Hold Time  Interface
+Spine_1         N/A             1      UP     00:00:26   Ethernet1/1
+Spine_2         N/A             1      UP     00:00:27   Ethernet1/2
 
-                Router Link States (Area 0.0.0.0)
+Leaf_1# sh isis 100 topology
+IS-IS process: 100
+VRF: default
+Topology ID: 0
 
-Link ID         ADV Router      Age        Seq#       Checksum Link Count
-10.0.0.1        10.0.0.1        1457       0x80000010 0xb181   5
-10.0.0.2        10.0.0.2        703        0x8000000b 0xc75d   5
-10.0.0.3        10.0.0.3        708        0x8000000b 0xd33e   5
-10.0.0.4        10.0.0.4        1019       0x8000000d 0x28ff   7
-10.0.0.5        10.0.0.5        567        0x8000000b 0x5fbb   7
+IS-IS Level-1 IS routing table
+Leaf_2.00, Instance 0x0000001A
+   *via Spine_1, Ethernet1/1, metric 80
+   *via Spine_2, Ethernet1/2, metric 80
+Leaf_3.00, Instance 0x0000001A
+   *via Spine_1, Ethernet1/1, metric 80
+   *via Spine_2, Ethernet1/2, metric 80
+Spine_1.00, Instance 0x0000001A
+   *via Spine_1, Ethernet1/1, metric 40
+Spine_2.00, Instance 0x0000001A
+   *via Spine_2, Ethernet1/2, metric 40
 ```
 ```
-Leaf_3# sh ip ospf neighbors
- OSPF Process ID 100 VRF default
- Total number of neighbors: 2
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.4          1 FULL/ -          01:46:48 172.16.0.9      Eth1/1
- 10.0.0.5          1 FULL/ -          01:41:23 172.16.0.11     Eth1/2
-Leaf_3#
-Leaf_3# sh ip ospf database
-        OSPF Router with ID (10.0.0.3) (Process ID 100 VRF default)
+Leaf_2# sh isis 100 adjacency
+IS-IS process: 100 VRF: default
+IS-IS adjacency database:
+Legend: '!': No AF level connectivity in given topology
+System ID       SNPA            Level  State  Hold Time  Interface
+Spine_1         N/A             1      UP     00:00:26   Ethernet1/1
+Spine_2         N/A             1      UP     00:00:26   Ethernet1/2
 
-                Router Link States (Area 0.0.0.0)
+Leaf_2# sh isis 100 topology
+IS-IS process: 100
+VRF: default
+Topology ID: 0
 
-Link ID         ADV Router      Age        Seq#       Checksum Link Count
-10.0.0.1        10.0.0.1        1522       0x80000010 0xb181   5
-10.0.0.2        10.0.0.2        769        0x8000000b 0xc75d   5
-10.0.0.3        10.0.0.3        770        0x8000000b 0xd33e   5
-10.0.0.4        10.0.0.4        1083       0x8000000d 0x28ff   7
-10.0.0.5        10.0.0.5        632        0x8000000b 0x5fbb   7
+IS-IS Level-1 IS routing table
+Leaf_1.00, Instance 0x00000018
+   *via Spine_1, Ethernet1/1, metric 80
+   *via Spine_2, Ethernet1/2, metric 80
+Leaf_3.00, Instance 0x00000018
+   *via Spine_1, Ethernet1/1, metric 80
+   *via Spine_2, Ethernet1/2, metric 80
+Spine_1.00, Instance 0x00000018
+   *via Spine_1, Ethernet1/1, metric 40
+Spine_2.00, Instance 0x00000018
+   *via Spine_2, Ethernet1/2, metric 40
 ```
 ```
-Spine_1# sh ip ospf neighbors
- OSPF Process ID 100 VRF default
- Total number of neighbors: 3
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.1          1 FULL/ -          02:23:47 172.16.0.0      Eth1/1
- 10.0.0.2          1 FULL/ -          02:14:33 172.16.0.4      Eth1/2
- 10.0.0.3          1 FULL/ -          02:14:32 172.16.0.8      Eth1/3
-Spine_1# sh ip ospf database
-        OSPF Router with ID (10.0.0.4) (Process ID 100 VRF default)
+Leaf_3# sh isis 100 adjacency
+IS-IS process: 100 VRF: default
+IS-IS adjacency database:
+Legend: '!': No AF level connectivity in given topology
+System ID       SNPA            Level  State  Hold Time  Interface
+Spine_1         N/A             1      UP     00:00:27   Ethernet1/1
+Spine_2         N/A             1      UP     00:00:29   Ethernet1/2
 
-                Router Link States (Area 0.0.0.0)
+Leaf_3# sh isis 100 topology
+IS-IS process: 100
+VRF: default
+Topology ID: 0
 
-Link ID         ADV Router      Age        Seq#       Checksum Link Count
-10.0.0.1        10.0.0.1        1539       0x80000010 0xb181   5
-10.0.0.2        10.0.0.2        787        0x8000000b 0xc75d   5
-10.0.0.3        10.0.0.3        790        0x8000000b 0xd33e   5
-10.0.0.4        10.0.0.4        1101       0x8000000d 0x28ff   7
-10.0.0.5        10.0.0.5        651        0x8000000b 0x5fbb   7
+IS-IS Level-1 IS routing table
+Leaf_1.00, Instance 0x00000014
+   *via Spine_1, Ethernet1/1, metric 80
+   *via Spine_2, Ethernet1/2, metric 80
+Leaf_2.00, Instance 0x00000014
+   *via Spine_1, Ethernet1/1, metric 80
+   *via Spine_2, Ethernet1/2, metric 80
+Spine_1.00, Instance 0x00000014
+   *via Spine_1, Ethernet1/1, metric 40
+Spine_2.00, Instance 0x00000014
+   *via Spine_2, Ethernet1/2, metric 40
 ```
 ```
-Spine_2# sh ip ospf neighbors
- OSPF Process ID 100 VRF default
- Total number of neighbors: 3
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.1          1 FULL/ -          01:39:20 172.16.0.2      Eth1/1
- 10.0.0.2          1 FULL/ -          01:41:35 172.16.0.6      Eth1/2
- 10.0.0.3          1 FULL/ -          01:41:36 172.16.0.10     Eth1/3
-Spine_2#
-Spine_2# sh ip ospf database
-        OSPF Router with ID (10.0.0.5) (Process ID 100 VRF default)
+Spine_1# sh isis 100 adjacency
+IS-IS process: 100 VRF: default
+IS-IS adjacency database:
+Legend: '!': No AF level connectivity in given topology
+System ID       SNPA            Level  State  Hold Time  Interface
+Leaf_1          N/A             1      UP     00:00:31   Ethernet1/1
+Leaf_2          N/A             1      UP     00:00:26   Ethernet1/2
+Leaf_3          N/A             1      UP     00:00:22   Ethernet1/3
 
-                Router Link States (Area 0.0.0.0)
+Spine_1# sh isis 100 topology
+IS-IS process: 100
+VRF: default
+Topology ID: 0
 
-Link ID         ADV Router      Age        Seq#       Checksum Link Count
-10.0.0.1        10.0.0.1        1561       0x80000010 0xb181   5
-10.0.0.2        10.0.0.2        808        0x8000000b 0xc75d   5
-10.0.0.3        10.0.0.3        811        0x8000000b 0xd33e   5
-10.0.0.4        10.0.0.4        1124       0x8000000d 0x28ff   7
-10.0.0.5        10.0.0.5        671        0x8000000b 0x5fbb   7
+IS-IS Level-1 IS routing table
+Leaf_1.00, Instance 0x0000001C
+   *via Leaf_1, Ethernet1/1, metric 40
+Leaf_2.00, Instance 0x0000001C
+   *via Leaf_2, Ethernet1/2, metric 40
+Leaf_3.00, Instance 0x0000001C
+   *via Leaf_3, Ethernet1/3, metric 40
+Spine_2.00, Instance 0x0000001C
+   *via Leaf_1, Ethernet1/1, metric 80
+   *via Leaf_2, Ethernet1/2, metric 80
+   *via Leaf_3, Ethernet1/3, metric 80
+```
+```
+Spine_2# sh isis 100 adjacency
+IS-IS process: 100 VRF: default
+IS-IS adjacency database:
+Legend: '!': No AF level connectivity in given topology
+System ID       SNPA            Level  State  Hold Time  Interface
+Leaf_1          N/A             1      UP     00:00:25   Ethernet1/1
+Leaf_2          N/A             1      UP     00:00:21   Ethernet1/2
+Leaf_3          N/A             1      UP     00:00:28   Ethernet1/3
+
+Spine_2# sh isis 100 topology
+IS-IS process: 100
+VRF: default
+Topology ID: 0
+
+IS-IS Level-1 IS routing table
+Leaf_1.00, Instance 0x0000000F
+   *via Leaf_1, Ethernet1/1, metric 40
+Leaf_2.00, Instance 0x0000000F
+   *via Leaf_2, Ethernet1/2, metric 40
+Leaf_3.00, Instance 0x0000000F
+   *via Leaf_3, Ethernet1/3, metric 40
+Spine_1.00, Instance 0x0000000F
+   *via Leaf_1, Ethernet1/1, metric 80
+   *via Leaf_2, Ethernet1/2, metric 80
+   *via Leaf_3, Ethernet1/3, metric 80
 ```
 ### Вывод RIB на примере Leaf_1
 ```
-Leaf_1#
-Leaf_1# sh ip route
+Leaf_1# sh ip route isis
 IP Route Table for VRF "default"
 '*' denotes best ucast next-hop
 '**' denotes best mcast next-hop
 '[x/y]' denotes [preference/metric]
 '%<string>' in via output denotes VRF <string>
 
-10.0.0.1/32, ubest/mbest: 2/0, attached
-    *via 10.0.0.1, Lo0, [0/0], 03:19:09, local
-    *via 10.0.0.1, Lo0, [0/0], 03:19:08, direct
 10.0.0.2/32, ubest/mbest: 2/0
-    *via 172.16.0.1, Eth1/1, [110/81], 02:16:55, ospf-100, intra
-    *via 172.16.0.3, Eth1/2, [110/81], 02:09:20, ospf-100, intra
+    *via 172.16.0.1, Eth1/1, [115/81], 00:53:38, isis-100, L1
+    *via 172.16.0.3, Eth1/2, [115/81], 00:51:55, isis-100, L1
 10.0.0.3/32, ubest/mbest: 2/0
-    *via 172.16.0.1, Eth1/1, [110/81], 02:16:54, ospf-100, intra
-    *via 172.16.0.3, Eth1/2, [110/81], 02:09:20, ospf-100, intra
+    *via 172.16.0.1, Eth1/1, [115/81], 00:53:25, isis-100, L1
+    *via 172.16.0.3, Eth1/2, [115/81], 00:51:45, isis-100, L1
 10.0.0.4/32, ubest/mbest: 1/0
-    *via 172.16.0.1, Eth1/1, [110/41], 02:22:00, ospf-100, intra
+    *via 172.16.0.1, Eth1/1, [115/41], 00:53:27, isis-100, L1
 10.0.0.5/32, ubest/mbest: 1/0
-    *via 172.16.0.3, Eth1/2, [110/41], 02:09:20, ospf-100, intra
-172.16.0.0/31, ubest/mbest: 1/0, attached
-    *via 172.16.0.0, Eth1/1, [0/0], 02:31:21, direct
-172.16.0.0/32, ubest/mbest: 1/0, attached
-    *via 172.16.0.0, Eth1/1, [0/0], 02:31:21, local
-172.16.0.2/31, ubest/mbest: 1/0, attached
-    *via 172.16.0.2, Eth1/2, [0/0], 03:39:30, direct
-172.16.0.2/32, ubest/mbest: 1/0, attached
-    *via 172.16.0.2, Eth1/2, [0/0], 03:39:30, local
+    *via 172.16.0.3, Eth1/2, [115/41], 00:51:47, isis-100, L1
 172.16.0.4/31, ubest/mbest: 1/0
-    *via 172.16.0.1, Eth1/1, [110/80], 02:26:11, ospf-100, intra
+    *via 172.16.0.1, Eth1/1, [115/80], 00:53:51, isis-100, L1
 172.16.0.6/31, ubest/mbest: 1/0
-    *via 172.16.0.3, Eth1/2, [110/80], 02:09:20, ospf-100, intra
+    *via 172.16.0.3, Eth1/2, [115/80], 00:52:05, isis-100, L1
 172.16.0.8/31, ubest/mbest: 1/0
-    *via 172.16.0.1, Eth1/1, [110/80], 02:26:11, ospf-100, intra
+    *via 172.16.0.1, Eth1/1, [115/80], 00:53:37, isis-100, L1
 172.16.0.10/31, ubest/mbest: 1/0
-    *via 172.16.0.3, Eth1/2, [110/80], 02:09:20, ospf-100, intra
+    *via 172.16.0.3, Eth1/2, [115/80], 00:51:57, isis-100, L1
 ```
 ### Проверка сетевой связности между Loopback интерфейсами всех нод от Leaf_1
 ```
@@ -229,4 +259,3 @@ PING 10.0.0.5 (10.0.0.5): 56 data bytes
 5 packets transmitted, 5 packets received, 0.00% packet loss
 round-trip min/avg/max = 3.414/5.236/6.697 ms
 ```
-
