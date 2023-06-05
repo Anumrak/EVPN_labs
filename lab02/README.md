@@ -50,7 +50,6 @@ router isis 100
   net 49.0001.0100.0000.0004.00
   log-adjacency-changes
 ```
-
 ### Вывод isis соседства между всеми устройствами и базы данных состояния каналов.
 ```
 Leaf_1# sh isis 100 adjacency
@@ -184,7 +183,6 @@ Spine_1.00, Instance 0x0000000F
    *via Leaf_2, Ethernet1/2, metric 80
    *via Leaf_3, Ethernet1/3, metric 80
 ```
-
 ### Вывод RIB на примере Leaf_1
 ```
 Leaf_1# sh ip route isis
@@ -213,8 +211,7 @@ IP Route Table for VRF "default"
 172.16.0.10/31, ubest/mbest: 1/0
     *via 172.16.0.3, Eth1/2, [115/80], 00:51:57, isis-100, L1
 ```
-
-### Проверка loopback адресов на примере роутера Leaf_01:
+### Проверка router-id соседей в LSDB на примере роутера Leaf_01:
 ```
 Leaf_1# sh isis 100 database router-id 10.0.0.4
 IS-IS Process: 100 LSP database VRF: default
@@ -225,16 +222,32 @@ IS-IS Level-1 Link State Database
 IS-IS Level-2 Link State Database
   LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
 
-Leaf_1# sh isis 100 database router-id 10.0.0.5
+Leaf_1# sh isis 100 database detail 0100.0000.0004.00-00
 IS-IS Process: 100 LSP database VRF: default
 IS-IS Level-1 Link State Database
   LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
-  Spine_2.00-00         0x0000000F   0xBD63    846        0/0/0/3
-
-IS-IS Level-2 Link State Database
-  LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
+  Spine_1.00-00         0x00000010   0x64D2    930        0/0/0/3
+    Instance      :  0x0000000E
+    Area Address  :  49.0001
+    NLPID         :  0xCC
+    Router ID     :  10.0.0.4
+    IP Address    :  10.0.0.4
+    Hostname      :  Spine_1            Length : 7
+    Extended IS   :  Leaf_3.00          Metric : 40
+      Interface IP Address :  172.16.0.9
+      IP Neighbor Address :  172.16.0.8
+    Extended IS   :  Leaf_2.00          Metric : 40
+      Interface IP Address :  172.16.0.5
+      IP Neighbor Address :  172.16.0.4
+    Extended IS   :  Leaf_1.00          Metric : 40
+      Interface IP Address :  172.16.0.1
+      IP Neighbor Address :  172.16.0.0
+    Extended IP   :        10.0.0.4/32  Metric : 1           (U)
+    Extended IP   :      172.16.0.8/31  Metric : 40          (U)
+    Extended IP   :      172.16.0.4/31  Metric : 40          (U)
+    Extended IP   :      172.16.0.0/31  Metric : 40          (U)
+    Digest Offset :  0
 ```
-
 ### Проверка сетевой связности между Loopback интерфейсами всех нод от Leaf_1
 ```
 Leaf_1# ping 10.0.0.2
