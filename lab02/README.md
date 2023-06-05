@@ -3,7 +3,7 @@
 1) Очистить RIB от маршрутов известных ранее через протокол OSPF, выключив его в корне настройки.
 2) Создать и поднять протокол IS-IS.
 3) Корректно указать system-id для протокола IS-IS исходя из установки идентификатора "net".
-4) Проверить отображение ожидаемых system-id средствами перотокола IS-IS.
+4) Проверить отображение ожидаемых loopback адресов средствами протокола IS-IS.
 5) Проверить сетевую связность до всех Loopback адресов.
 # Целевая схема
 ![Снимок](https://github.com/Anumrak/EVPN_labs/assets/133969023/6207ac40-14de-454f-ac56-6adfd13a0d87)
@@ -184,6 +184,7 @@ Spine_1.00, Instance 0x0000000F
    *via Leaf_2, Ethernet1/2, metric 80
    *via Leaf_3, Ethernet1/3, metric 80
 ```
+
 ### Вывод RIB на примере Leaf_1
 ```
 Leaf_1# sh ip route isis
@@ -212,6 +213,28 @@ IP Route Table for VRF "default"
 172.16.0.10/31, ubest/mbest: 1/0
     *via 172.16.0.3, Eth1/2, [115/80], 00:51:57, isis-100, L1
 ```
+
+### Проверка loopback адресов на примере роутера Leaf_01:
+```
+Leaf_1# sh isis 100 database router-id 10.0.0.4
+IS-IS Process: 100 LSP database VRF: default
+IS-IS Level-1 Link State Database
+  LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
+  Spine_1.00-00         0x0000000E   0x68D0    760        0/0/0/3
+
+IS-IS Level-2 Link State Database
+  LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
+
+Leaf_1# sh isis 100 database router-id 10.0.0.5
+IS-IS Process: 100 LSP database VRF: default
+IS-IS Level-1 Link State Database
+  LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
+  Spine_2.00-00         0x0000000F   0xBD63    846        0/0/0/3
+
+IS-IS Level-2 Link State Database
+  LSPID                 Seq Number   Checksum  Lifetime   A/P/O/T
+```
+
 ### Проверка сетевой связности между Loopback интерфейсами всех нод от Leaf_1
 ```
 Leaf_1# ping 10.0.0.2
