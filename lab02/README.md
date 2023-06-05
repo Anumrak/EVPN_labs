@@ -68,7 +68,7 @@ router isis 100
   net 49.0001.0100.0000.0004.00
   log-adjacency-changes
 ```
-### Вывод isis соседства между всеми устройствами и топологии соседств в RIB от LSB 1го уровня.
+### Вывод isis соседства между всеми устройствами и топологии соседств в RIB от LSDB 1го уровня.
 ```
 Leaf_1# sh isis 100 adjacency
 IS-IS process: 100 VRF: default
