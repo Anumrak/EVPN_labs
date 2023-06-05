@@ -144,7 +144,6 @@ Link ID         ADV Router      Age        Seq#       Checksum Link Count
 ```
 ### Вывод RIB на примере Leaf_1
 ```
-Leaf_1#
 Leaf_1# sh ip route
 IP Route Table for VRF "default"
 '*' denotes best ucast next-hop
@@ -229,4 +228,3 @@ PING 10.0.0.5 (10.0.0.5): 56 data bytes
 5 packets transmitted, 5 packets received, 0.00% packet loss
 round-trip min/avg/max = 3.414/5.236/6.697 ms
 ```
-
