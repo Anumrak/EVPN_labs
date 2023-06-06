@@ -1,8 +1,8 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Tue Jun  6 00:53:28 2023
-!Time: Tue Jun  6 00:53:29 2023
+!Running configuration last done at: Tue Jun  6 14:00:16 2023
+!Time: Tue Jun  6 14:00:17 2023
 
 version 9.3(10) Bios:version  
 hostname Spine_1
@@ -234,6 +234,7 @@ router isis 100
 router bgp 64086.59904
   router-id 10.0.0.4
   reconnect-interval 5
+  log-neighbor-changes
   address-family ipv4 unicast
     redistribute direct route-map rm_connected
     maximum-paths ibgp 64
