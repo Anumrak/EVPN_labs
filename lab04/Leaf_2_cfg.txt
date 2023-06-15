@@ -1,8 +1,8 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Wed Jun 14 21:52:30 2023
-!Time: Wed Jun 14 21:52:31 2023
+!Running configuration last done at: Thu Jun 15 11:14:24 2023
+!Time: Thu Jun 15 11:14:24 2023
 
 version 9.3(10) Bios:version  
 hostname Leaf_2
@@ -220,6 +220,7 @@ router isis 100
   log-adjacency-changes
 router bgp 64086.59906
   router-id 10.0.0.2
+  bestpath as-path multipath-relax
   reconnect-interval 5
   log-neighbor-changes
   address-family ipv4 unicast

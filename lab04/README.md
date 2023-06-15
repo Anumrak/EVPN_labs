@@ -23,6 +23,7 @@
 ```
 router bgp 64086.59905
   router-id 10.0.0.1
+  bestpath as-path multipath-relax
   reconnect-interval 5
   log-neighbor-changes
   address-family ipv4 unicast
