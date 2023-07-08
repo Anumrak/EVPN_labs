@@ -396,3 +396,4 @@ Ip Address      Age      Mac Address    Vlan Physical-ifindex    Flags    Remote
 Тут также видно, что удаленные ARP записи были выучены от VTEP адресов Leaf_2 и Leaf_3.
 
 На последок прикладываю вид заголовка трафика с ICMP пакетом, снятым с интерфейса Ethernet 1/1 роутера Leaf_1 при запросе от его VPC клиента.
+![vxlan icmp](https://github.com/Anumrak/EVPN_labs/assets/133969023/8c114b96-2315-4dd4-95fd-e6ddcfb3353f)
