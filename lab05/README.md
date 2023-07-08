@@ -1,4 +1,4 @@
-# Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k. (VXLAN over eBGP EVPN version)
+# Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k. (VXLAN over eBGP EVPN L2 VPN version)
 Цели
 1) Включить нужные функции для evpn, vxlan и arp suppression на роутерах типа Leaf.
 2) Включить нужные функции для evpn на роутерах типа Spine.
@@ -124,12 +124,12 @@ neighbor 10.0.0.0/30 remote-as route-map leafs
       send-community extended
       route-map next-hop-unchanged out
 ```
-Создание vlan и добавление ему VXLAN идентификатора
+Создание vlan и добавление ему VXLAN Network Identifier (VNI)
 ```
 vlan 100
   vn-segment 10100
 ```
-Создание evpn route distinguisher и route-target для нужного участника virtual network
+Создание evpn route distinguisher и route-target для нужного VNI
 ```
 evpn
   vni 10100 l2
@@ -342,7 +342,7 @@ Route Distinguisher: 10.0.0.3:100
 ```
 *>e[2]:[0]:[0]:[48]:[0050.7966.6807]:[0]:[0.0.0.0]/216
 ```
-является маршрутом второго типа mac-ip, который сообщает MAC адрес, выученный от data plane во vlan id 100
+является маршрутом второго типа mac-ip, который сообщает MAC адрес, выученный от data plane во vlan id 100.
 Второй маршрут, также типа mac-ip, но уже несет в себе и IP адрес хоста во vlan id 100, но выучен он уже благодаря функционалу arp suppression
 включенном на nve интерфейсе в начале
 ```
@@ -375,7 +375,7 @@ C  100     0050.7966.6807   dynamic  0         F      F    nve1(10.0.0.2)
 C  100     0050.7966.6808   dynamic  0         F      F    nve1(10.0.0.3)
 G    -     5001.0000.1b08   static   -         F      F    sup-eth1(R)
 ```
-Флаг "C" указывает на то что мак адрес был выучен из Control Plane, в нашем случае это eBGP evpn. Интерфейс, за которым он был выучен наш NVE интерфейс и адрес соответствующего VTEP.
+Флаг "C" указывает на то, что мак адрес был выучен из Control Plane, в нашем случае это eBGP evpn. Интерфейс, за которым он был выучен наш NVE интерфейс и адрес соответствующего VTEP.
 ### Проверка arp suppression таблицы
 ```
 Leaf_1# sh ip arp suppression-cache detail
