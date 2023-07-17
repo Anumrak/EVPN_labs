@@ -464,6 +464,8 @@ n HW
       Received label 7777
       Extcommunity: RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
 ```
+Так выглядит NLRI с EVPN route-type 5 в дампе
+
 ```
 Leaf_2# sh ip route 0.0.0.0 vrf Leafs_L3VNI
 IP Route Table for VRF "Leafs_L3VNI"
