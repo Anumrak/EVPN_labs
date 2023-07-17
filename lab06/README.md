@@ -125,7 +125,7 @@ vrf context Leafs_L3VNI
     route-target export 4200000001:7777 evpn
 ```
 RT IP-VRF добавляется к RT MAC-IP для отправления обновления с маршрутом типа route-type 2. Также добавляется такое расширенное community как Router MAC.
-С его помощью мы сообщаем настоящий MAC адрес шлюза, чтобы с другой стороны хост смог отправить нам ответ. Конечно перед ответом, другой Leaf должен отправтиь нам точно такое же зеркальное обновление. В таком обновлении будет присутствовать оба VNI. Как мы уже говорили ранее, в route-type 2 экспортируются оба маршрута: из L2RIB и L3RIB.
+С его помощью мы сообщаем настоящий MAC адрес шлюза, чтобы с другой стороны хост смог отправить нам ответ. Конечно перед ответом, другой Leaf должен отправить нам точно такое же зеркальное обновление. В таком обновлении будет присутствовать оба VNI. В route-type 2 экспортируются оба RT: из L2RIB и L3RIB. Это нужно для связи с этим хостом как с помощью L2VNI, так и с помощью L3VNI на другой стороне.
 ![L3VNI 192 168 1 1_painted](https://github.com/Anumrak/EVPN_labs/assets/133969023/8ea3b1cb-8737-4a28-a055-6a6cb58a2c93)
 
 
@@ -331,11 +331,11 @@ Route Distinguisher: 10.0.0.3:300
                       10.0.0.3                                       0 4200000003 i
 ```
 Вы могли заметить, что есть разница через слэш в EVPN маршрутах с RD 10.0.0.1:100 и 10.0.0.1:300.
-/272, /248 это количество бит информации в поле NLRI(Network Layer Reachability Information) атрибута пути MP_REACH_NLRI BGP обновления, когда нужно сообщить о доступности новой маршрутной информации. Высчитывается следующими полями: RD - 8 байт (октетов), ESI - 10 байт, MAC адрес - 6 байт, IPv4 адрес - 4 байта, VNI - 3 байта.
+/272, /248 это количество бит информации в поле NLRI (Network Layer Reachability Information) атрибута пути MP_REACH_NLRI BGP обновления, когда нужно сообщить о доступности новой маршрутной информации. Высчитывается следующими полями: RD - 8 байт (октетов), ESI - 10 байт, MAC адрес - 6 байт, IPv4 адрес - 4 байта, VNI - 3 байта.
 На примере этого дампа можно увидеть, что разница только в количестве VNI - 3 байта. Но в route-type 2 маршруте без IP адреса мы вычитаем IPv4 поле и получаем 216 бит.
 ![L3VNI 192 168 1 1_bits](https://github.com/Anumrak/EVPN_labs/assets/133969023/ef69a114-6d3b-43b6-bdf2-b4531fa06849)
 
-### Проверка импорта route-type 2 и 5 EVPN маршрута в L3RIB Leaf_2
+### Проверка импорта route-type 2 и 5 EVPN маршрутов в L2RIB и L3RIB Leaf_2
 ```
 Leaf_2# sh bgp l2vpn evpn 192.168.1.1
 BGP routing table information for VRF default, address family L2VPN EVPN
@@ -416,6 +416,25 @@ IP Route Table for VRF "Leafs_L3VNI"
 192.168.1.1/32, ubest/mbest: 1/0
     *via 10.0.0.1%default, [20/0], 12:16:21, bgp-64086.59906, external, tag 4200
 000000, segid: 7777 tunnelid: 0xa000001 encap: VXLAN
+```
+```
+Leaf_2# sh ip arp suppression-cache detail
+
+Flags: + - Adjacencies synced via CFSoE
+       L - Local Adjacency
+       R - Remote Adjacency
+       L2 - Learnt over L2 interface
+       PS - Added via L2RIB, Peer Sync
+       RO - Dervied from L2RIB Peer Sync Entry
+
+Ip Address      Age      Mac Address    Vlan Physical-ifindex    Flags    Remote Vtep Addrs
+
+192.168.1.2     00:16:23 0050.7966.6807  100 Ethernet1/11        L
+192.168.1.3     14:38:57 0050.7966.6808  100 (null)              R        10.0.0.3
+192.168.1.1     14:48:14 0050.7966.6806  100 (null)              R        10.0.0.1
+192.168.2.2     00:16:23 0050.7966.680a  200 Ethernet1/12        L
+192.168.2.3     14:38:34 0050.7966.680b  200 (null)              R        10.0.0.3
+192.168.2.1     14:38:51 0050.7966.6809  200 (null)              R        10.0.0.1
 ```
 ```
 Leaf_2# sh bgp l2vpn evpn 0.0.0.0
