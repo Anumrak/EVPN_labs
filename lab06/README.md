@@ -107,6 +107,7 @@ fabric forwarding anycast-gateway-mac 0000.0000.7777
 fabric forwarding mode anycast-gateway
 ```
 Конфигурация L3VNI vrf на примере Leaf_1.
+
 RT IP-VRF для экспорта устанавливает IPv4 префиксы в L2VPN EVPN route-type 5 маршрут.
 RT IP-VRF для импорта устанавливает L2VPN EVPN route-type 5 маршруты в L3RIB.
 ```
