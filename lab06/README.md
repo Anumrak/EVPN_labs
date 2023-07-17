@@ -465,6 +465,7 @@ n HW
       Extcommunity: RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
 ```
 Так выглядит NLRI с EVPN route-type 5 в дампе
+![route-type 5 default route](https://github.com/Anumrak/EVPN_labs/assets/133969023/48a4f078-51f3-416f-9229-fd3bfc5b0072)
 
 ```
 Leaf_2# sh ip route 0.0.0.0 vrf Leafs_L3VNI
@@ -552,7 +553,7 @@ VPCS> sh arp
 00:00:00:00:77:77  192.168.1.254 expires in 34 seconds
 ```
 В дампе трафика видно, что при обращении к другой подсети, в VXLAN заголовке устанавливается метка L3 VNI 7777
-
+![L3VNI icmp](https://github.com/Anumrak/EVPN_labs/assets/133969023/e3803031-d674-4632-8010-ec4a8c8d90ce)
 
 TTL снимается 2 раза, до хоста в другой подсети на локальном Leaf и обратно, потому что пакету приходится пройти только через свой шлюз в локальном vrf - мы получает ответ с TTL 63.
 
