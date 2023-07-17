@@ -311,6 +311,9 @@ router bgp 64086.59906
     remote-as 64086.59904
     update-source loopback0
     ebgp-multihop 2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
   template peer Spines
     remote-as 64086.59904
     password 3 7b12be5a1d75eaf0
@@ -319,15 +322,9 @@ router bgp 64086.59906
   neighbor 10.0.0.4
     inherit peer Overlay
     description Spine_1_overlay
-    address-family l2vpn evpn
-      send-community
-      send-community extended
   neighbor 10.0.0.5
     inherit peer Overlay
     description Spine_2_overlay
-    address-family l2vpn evpn
-      send-community
-      send-community extended
   neighbor 172.16.0.5
     inherit peer Spines
     description Spine_1

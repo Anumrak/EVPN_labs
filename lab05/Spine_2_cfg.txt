@@ -3,7 +3,7 @@
 !Command: show running-config
 !Running configuration last done at: Sat Jul  8 12:47:21 2023
 !Time: Sat Jul  8 12:47:22 2023
-
+!
 version 9.3(10) Bios:version  
 hostname Spine_2
 vdc Spine_2 id 1

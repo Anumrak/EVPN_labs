@@ -1,4 +1,4 @@
-# Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k. (VXLAN over eBGP EVPN L2 VPN version)
+# Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k. (VXLAN over MP-BGP EVPN L2 VPN version)
 Цели
 1) Включить нужные функции для evpn, vxlan и arp suppression на роутерах типа Leaf.
 2) Включить нужные функции для evpn на роутерах типа Spine.
@@ -57,6 +57,9 @@ router bgp 64086.59905
     remote-as 64086.59904
     update-source loopback0
     ebgp-multihop 2
+    address-family l2vpn evpn
+      send-community
+      send-community extended
   template peer Spines
     remote-as 64086.59904
     password 3 7b12be5a1d75eaf0
@@ -65,15 +68,9 @@ router bgp 64086.59905
   neighbor 10.0.0.4
     inherit peer Overlay
     description Spine_1_overlay
-    address-family l2vpn evpn
-      send-community
-      send-community extended
   neighbor 10.0.0.5
     inherit peer Overlay
     description Spine_2_overlay
-    address-family l2vpn evpn
-      send-community
-      send-community extended
   neighbor 172.16.0.1
     inherit peer Spines
     description Spine_1
