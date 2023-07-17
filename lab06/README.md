@@ -563,8 +563,8 @@ https://www.theasciiconstruct.com/post/nxos-evpn-symmetric-hybrid/#understanding
 
 https://www.cisco.com/c/en/us/td/docs/dcn/nx-os/nexus9000/102x/configuration/vxlan/cisco-nexus-9000-series-nx-os-vxlan-configuration-guide-release-102x/m-evpn-hybrid-irb-mode.html
 
-Так как группа Dev не имеет шлюза ни на одном из Leaf, то им будет доступна только L2 связность между всеми Leaf.
 ### Проверка связности внутри группы Dev
+Так как группа Dev не имеет шлюза ни на одном из Leaf, то им будет доступна только L2 связность между всеми Leaf.
 ```
 NAME        : VPCS[1]
 IP/MASK     : 192.168.3.1/24
