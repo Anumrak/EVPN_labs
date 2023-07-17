@@ -8,7 +8,7 @@
 6) Настроить NVE интерфейс для L2 и L3 VNI.
 7) Дополнить секцию BGP для отправки обновлений с данными о vrf на Spine роутеры.
 8) Дополнить секцию BGP Leaf_1 для отправки обновлений с маршрутом по умолчанию для Leaf_2 и Leaf_3.
-9) Проверить наличие обновлений на Spine_1 о маршрутах route-type 2 и 5 от Leaf_1.
+9) Проверить наличие обновлений на Spine_1.
 10) Проверить на Leaf_2 как примерном импорт route-type 2 и 5 в L3RIB.
 11) Проверить сетевую связность между всеми группами.
 # Целевая схема
@@ -43,7 +43,9 @@ nv overlay evpn
 feature fabric forwarding
 ```
 В lab05 мы уже разбирали механику L2VNI связи между Leaf свитчами. Для группы Dev этого будет достаточно.
+
 RT MAC-IP для экспорта устанавливает mac/arp/hmm route из L2RIB в L2VPN EVPN route-type 2 маршрут.
+
 RT MAC-IP для импорта устанавливает L2VPN EVPN route-type 2 маршруты в L2RIB.
 ```
 evpn
@@ -109,6 +111,7 @@ fabric forwarding mode anycast-gateway
 Конфигурация L3VNI vrf на примере Leaf_1.
 
 RT IP-VRF для экспорта устанавливает IPv4 префиксы в L2VPN EVPN route-type 5 маршрут.
+
 RT IP-VRF для импорта устанавливает L2VPN EVPN route-type 5 маршруты в L3RIB.
 ```
 vrf context Leafs_L3VNI
@@ -222,12 +225,11 @@ router bgp 64086.59904
     maximum-peers 3
     address-family ipv4 unicast
 ```
-### Проверка наличия обновлений на Spine_1 как примерном о маршрутах route-type 2 и 5
+### Проверка наличия обновлений на Spine_1
 ```
-Spine_1# sh bgp l2vpn evpn neighbors 10.0.0.1 routes
-
-Peer 10.0.0.1 routes for address family L2VPN EVPN:
-BGP table version is 185, Local Router ID is 10.0.0.4
+Spine_1# sh bgp l2vpn evpn
+BGP routing table information for VRF default, address family L2VPN EVPN
+BGP table version is 211, Local Router ID is 10.0.0.4
 Status: s-suppressed, x-deleted, S-stale, d-dampened, h-history, *-valid, >-best
 Path type: i-internal, e-external, c-confed, l-local, a-aggregate, r-redist, I-injected
 Origin codes: i - IGP, e - EGP, ? - incomplete, | - multipath, & - backup, 2 - best2
@@ -264,25 +266,54 @@ Route Distinguisher: 10.0.0.1:300
 Route Distinguisher: 10.0.0.1:7777
 *>e[5]:[0]:[0]:[0]:[0.0.0.0]/224
                       10.0.0.1                                       0 4200000001 i
-```
-```
-Spine_1# sh bgp l2vpn evpn 192.168.1.1
-BGP routing table information for VRF default, address family L2VPN EVPN
-Route Distinguisher: 10.0.0.1:100
-BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272, version 18
-Paths: (1 available, best #1)
-Flags: (0x000202) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
-  Advertised path-id 1
-  Path type: external, path is valid, is best path, no labeled nexthop
-  AS-Path: 4200000001 , path sourced external to AS
-    10.0.0.1 (metric 0) from 10.0.0.1 (10.0.0.1)
-      Origin IGP, MED not set, localpref 100, weight 0
-      Received label 10100 7777
-      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
+Route Distinguisher: 10.0.0.2:100
+*>e[2]:[0]:[0]:[48]:[0050.7966.6807]:[0]:[0.0.0.0]/216
+                      10.0.0.2                                       0 4200000002 i
+*>e[2]:[0]:[0]:[48]:[0050.7966.6807]:[32]:[192.168.1.2]/272
+                      10.0.0.2                                       0 4200000002 i
+*>e[3]:[0]:[32]:[10.0.0.2]/88
+                      10.0.0.2                                       0 4200000002 i
 
-  Path-id 1 advertised to peers:
-    10.0.0.2           10.0.0.3
+Route Distinguisher: 10.0.0.2:200
+*>e[2]:[0]:[0]:[48]:[0050.7966.680a]:[0]:[0.0.0.0]/216
+                      10.0.0.2                                       0 4200000002 i
+*>e[2]:[0]:[0]:[48]:[0050.7966.680a]:[32]:[192.168.2.2]/272
+                      10.0.0.2                                       0 4200000002 i
+*>e[3]:[0]:[32]:[10.0.0.2]/88
+                      10.0.0.2                                       0 4200000002 i
+
+Route Distinguisher: 10.0.0.2:300
+*>e[2]:[0]:[0]:[48]:[0050.7966.680d]:[0]:[0.0.0.0]/216
+                      10.0.0.2                                       0 4200000002 i
+*>e[2]:[0]:[0]:[48]:[0050.7966.680d]:[32]:[192.168.3.2]/248
+                      10.0.0.2                                       0 4200000002 i
+*>e[3]:[0]:[32]:[10.0.0.2]/88
+                      10.0.0.2                                       0 4200000002 i
+
+Route Distinguisher: 10.0.0.3:100
+*>e[2]:[0]:[0]:[48]:[0050.7966.6808]:[0]:[0.0.0.0]/216
+                      10.0.0.3                                       0 4200000003 i
+*>e[2]:[0]:[0]:[48]:[0050.7966.6808]:[32]:[192.168.1.3]/272
+                      10.0.0.3                                       0 4200000003 i
+*>e[3]:[0]:[32]:[10.0.0.3]/88
+                      10.0.0.3                                       0 4200000003 i
+
+Route Distinguisher: 10.0.0.3:200
+*>e[2]:[0]:[0]:[48]:[0050.7966.680b]:[0]:[0.0.0.0]/216
+                      10.0.0.3                                       0 4200000003 i
+*>e[2]:[0]:[0]:[48]:[0050.7966.680b]:[32]:[192.168.2.3]/272
+                      10.0.0.3                                       0 4200000003 i
+*>e[3]:[0]:[32]:[10.0.0.3]/88
+                      10.0.0.3                                       0 4200000003 i
+
+Route Distinguisher: 10.0.0.3:300
+*>e[2]:[0]:[0]:[48]:[0050.7966.680e]:[0]:[0.0.0.0]/216
+                      10.0.0.3                                       0 4200000003 i
+*>e[2]:[0]:[0]:[48]:[0050.7966.680e]:[32]:[192.168.3.3]/248
+                      10.0.0.3                                       0 4200000003 i
+*>e[3]:[0]:[32]:[10.0.0.3]/88
+                      10.0.0.3                                       0 4200000003 i
 ```
 Вы могли заметить, что есть разница через слэш в EVPN маршрутах с RD 10.0.0.1:100 и 10.0.0.1:300.
 /272, /248 это количество бит информации в поле NLRI(Network Layer Reachability Information) атрибута пути MP_REACH_NLRI BGP обновления, когда нужно сообщить о доступности новой маршрутной информации. Высчитывается следующими полями: RD - 8 байт (октетов), ESI - 10 байт, MAC адрес - 6 байт, IPv4 адрес - 4 байта, VNI - 3 байта.
