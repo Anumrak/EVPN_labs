@@ -340,20 +340,16 @@ Route Distinguisher: 10.0.0.3:300
 Leaf_2# sh bgp l2vpn evpn 192.168.1.1
 BGP routing table information for VRF default, address family L2VPN EVPN
 Route Distinguisher: 10.0.0.1:100
-BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]
-/272, version 280
+BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272, version 9422
 Paths: (2 available, best #2)
-Flags: (0x000202) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
-n HW
+Flags: (0x000202) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
-  Path type: external, path is valid, not best reason: newer EBGP path, no label
-ed nexthop
+  Path type: external, path is valid, not best reason: newer EBGP path, no labeled nexthop
   AS-Path: 4200000000 4200000001 , path sourced external to AS
     10.0.0.1 (metric 0) from 10.0.0.5 (10.0.0.5)
       Origin IGP, MED not set, localpref 100, weight 0
       Received label 10100 7777
-      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000
-.1b08
+      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
 
   Advertised path-id 1
   Path type: external, path is valid, is best path, no labeled nexthop
@@ -363,47 +359,41 @@ ed nexthop
     10.0.0.1 (metric 0) from 10.0.0.4 (10.0.0.4)
       Origin IGP, MED not set, localpref 100, weight 0
       Received label 10100 7777
-      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000
-.1b08
+      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
 
   Path-id 1 not advertised to any peer
 
 Route Distinguisher: 10.0.0.2:100    (L2VNI 10100)
-BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]
-/272, version 266
+BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272, version 9420
 Paths: (1 available, best #1)
 Flags: (0x000212) (high32 00000000) on xmit-list, is in l2rib/evpn, is not in HW
 
   Advertised path-id 1
   Path type: external, path is valid, is best path, no labeled nexthop, in rib
-             Imported from 10.0.0.1:100:[2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[
-192.168.1.1]/272
+             Imported from 10.0.0.1:100:[2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272
   AS-Path: 4200000000 4200000001 , path sourced external to AS
     10.0.0.1 (metric 0) from 10.0.0.4 (10.0.0.4)
       Origin IGP, MED not set, localpref 100, weight 0
       Received label 10100 7777
-      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000
-.1b08
+      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
 
   Path-id 1 not advertised to any peer
 
 Route Distinguisher: 10.0.0.2:7777    (L3VNI 7777)
-BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]
-/272, version 267
+BGP routing table entry for [2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272, version 9421
 Paths: (1 available, best #1)
-Flags: (0x000202) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
-n HW
+Flags: (0x000202) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
   Advertised path-id 1
   Path type: external, path is valid, is best path, no labeled nexthop
-             Imported from 10.0.0.1:100:[2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[
-192.168.1.1]/272
+             Imported from 10.0.0.1:100:[2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272
   AS-Path: 4200000000 4200000001 , path sourced external to AS
     10.0.0.1 (metric 0) from 10.0.0.4 (10.0.0.4)
       Origin IGP, MED not set, localpref 100, weight 0
       Received label 10100 7777
-      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000
-.1b08
+      Extcommunity: RT:10100:100 RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
+
+  Path-id 1 not advertised to any peer
 ```
 ```
 Leaf_2# sh ip route 192.168.1.1 vrf Leafs_L3VNI
@@ -414,8 +404,8 @@ IP Route Table for VRF "Leafs_L3VNI"
 '%<string>' in via output denotes VRF <string>
 
 192.168.1.1/32, ubest/mbest: 1/0
-    *via 10.0.0.1%default, [20/0], 12:16:21, bgp-64086.59906, external, tag 4200
-000000, segid: 7777 tunnelid: 0xa000001 encap: VXLAN
+    *via 10.0.0.1%default, [20/0], 00:04:44, bgp-64086.59906, external, tag 4200000000, segid: 7777
+tunnelid: 0xa000001 encap: VXLAN
 ```
 ```
 Leaf_2# sh ip arp suppression-cache detail
@@ -440,19 +430,9 @@ Ip Address      Age      Mac Address    Vlan Physical-ifindex    Flags    Remote
 Leaf_2# sh bgp l2vpn evpn 0.0.0.0
 BGP routing table information for VRF default, address family L2VPN EVPN
 Route Distinguisher: 10.0.0.1:7777
-BGP routing table entry for [5]:[0]:[0]:[0]:[0.0.0.0]/224, version 279
-Paths: (2 available, best #2)
-Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
-n HW
-
-  Path type: external, path is valid, not best reason: newer EBGP path, no label
-ed nexthop
-  Gateway IP: 0.0.0.0
-  AS-Path: 4200000000 4200000001 , path sourced external to AS
-    10.0.0.1 (metric 0) from 10.0.0.5 (10.0.0.5)
-      Origin IGP, MED not set, localpref 100, weight 0
-      Received label 7777
-      Extcommunity: RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
+BGP routing table entry for [5]:[0]:[0]:[0]:[0.0.0.0]/224, version 9401
+Paths: (2 available, best #1)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
   Advertised path-id 1
   Path type: external, path is valid, is best path, no labeled nexthop
@@ -465,13 +445,20 @@ ed nexthop
       Received label 7777
       Extcommunity: RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
 
+  Path type: external, path is valid, not best reason: Router Id, no labeled nexthop
+  Gateway IP: 0.0.0.0
+  AS-Path: 4200000000 4200000001 , path sourced external to AS
+    10.0.0.1 (metric 0) from 10.0.0.5 (10.0.0.5)
+      Origin IGP, MED not set, localpref 100, weight 0
+      Received label 7777
+      Extcommunity: RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
+
   Path-id 1 not advertised to any peer
 
 Route Distinguisher: 10.0.0.2:7777    (L3VNI 7777)
-BGP routing table entry for [5]:[0]:[0]:[0]:[0.0.0.0]/224, version 265
+BGP routing table entry for [5]:[0]:[0]:[0]:[0.0.0.0]/224, version 9402
 Paths: (1 available, best #1)
-Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
-n HW
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
   Advertised path-id 1
   Path type: external, path is valid, is best path, no labeled nexthop
@@ -482,6 +469,8 @@ n HW
       Origin IGP, MED not set, localpref 100, weight 0
       Received label 7777
       Extcommunity: RT:4200000001:7777 ENCAP:8 Router MAC:5001.0000.1b08
+
+  Path-id 1 not advertised to any peer
 ```
 Так выглядит NLRI с EVPN route-type 5 в дампе
 ![route-type 5 default route](https://github.com/Anumrak/EVPN_labs/assets/133969023/48a4f078-51f3-416f-9229-fd3bfc5b0072)
@@ -495,8 +484,8 @@ IP Route Table for VRF "Leafs_L3VNI"
 '%<string>' in via output denotes VRF <string>
 
 0.0.0.0/0, ubest/mbest: 1/0
-    *via 10.0.0.1%default, [20/0], 12:00:46, bgp-64086.59906, external, tag 4200
-000000, segid: 7777 tunnelid: 0xa000001 encap: VXLAN
+    *via 10.0.0.1%default, [20/0], 01:17:20, bgp-64086.59906, external, tag 4200000000, segid: 7777
+tunnelid: 0xa000001 encap: VXLAN
 ```
 ### Проверка связности HQ между другими HQ
 ```
