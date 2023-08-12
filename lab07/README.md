@@ -17,7 +17,7 @@
 15) Проверить установку BGP обновления в L3RIB Leaf_3.
 16) Проверить сетевую связность между клиентом Leaf_3 и Client_Router сетью.
 # Целевая схема
-![map](https://github.com/Anumrak/EVPN_labs/assets/133969023/f91aa432-414d-40db-9d06-ee10fe326178)
+![Снимок](https://github.com/Anumrak/EVPN_labs/assets/133969023/36d551a4-8bfd-4751-8a73-97de4b962915)
 
 
 
