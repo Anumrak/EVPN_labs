@@ -20,7 +20,7 @@ feature ospf
 feature bgp
 feature isis
 feature bfd
-
+===
 no password strength-check
 username admin password 5 $5$LAPKHE$wO.YNFINsof2e/lchFvJoGHQpZLNF303q6VxmHh6tM9  role network-admin
 ip domain-lookup
