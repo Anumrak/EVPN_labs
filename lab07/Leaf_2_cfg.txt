@@ -1,8 +1,8 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Sat Aug 12 20:33:43 2023
-!Time: Sat Aug 12 20:33:44 2023
+!Running configuration last done at: Sat Aug 12 23:03:06 2023
+!Time: Sat Aug 12 23:03:07 2023
 
 version 9.3(10) Bios:version  
 hostname Leaf_2
@@ -72,7 +72,6 @@ hardware access-list tcam region racl 512
 hardware access-list tcam region arp-ether 256 double-wide
 vpc domain 1
   peer-keepalive destination 192.168.255.0 source 192.168.255.1 vrf Keepalive
-  peer-gateway
   ip arp synchronize
 
 
@@ -84,9 +83,7 @@ interface Vlan100
   description VPCS_1_GW
   no shutdown
   vrf member Leafs_L3VNI
-  no ip redirects
   ip address 192.168.1.254/24
-  no ipv6 redirects
   fabric forwarding mode anycast-gateway
 
 interface Vlan200
@@ -102,9 +99,7 @@ interface Vlan400
   description Client_Router_GW
   no shutdown
   vrf member Leafs_L3VNI
-  no ip redirects
   ip address 192.168.4.254/24
-  no ipv6 redirects
   fabric forwarding mode anycast-gateway
 
 interface Vlan777
@@ -117,11 +112,13 @@ interface Vlan777
   no ipv6 redirects
 
 interface port-channel7
+  description -C- | Client_Router port 1 | Clients
   switchport mode trunk
   switchport trunk allowed vlan 400
   vpc 7
 
 interface port-channel99
+  description -M- | vPC Peer Link | vPC
   switchport mode trunk
   spanning-tree port type network
   vpc peer-link
@@ -184,6 +181,7 @@ interface Ethernet1/6
   shutdown
 
 interface Ethernet1/7
+  description -C- | Client_Router eth 0/2 | Clients
   switchport mode trunk
   switchport trunk allowed vlan 400
   channel-group 7 mode active
@@ -195,6 +193,7 @@ interface Ethernet1/9
   shutdown
 
 interface Ethernet1/10
+  description -I- | vPC Keepalive link | vPC
   no switchport
   vrf member Keepalive
   ip address 192.168.255.1/31
@@ -213,10 +212,12 @@ interface Ethernet1/13
   switchport access vlan 300
 
 interface Ethernet1/14
+  description -M- | Leaf_1 eth 1/14 | vPC
   switchport mode trunk
   channel-group 99 mode active
 
 interface Ethernet1/15
+  description -M- | Leaf_1 eth 1/15 | vPC
   switchport mode trunk
   channel-group 99 mode active
 
