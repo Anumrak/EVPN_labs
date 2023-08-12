@@ -1,12 +1,12 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Sat Aug 12 18:29:23 2023
-!Time: Sat Aug 12 18:29:23 2023
+!Running configuration last done at: Sat Aug 12 18:35:33 2023
+!Time: Sat Aug 12 18:35:34 2023
 
 version 9.3(10) Bios:version  
-hostname Spine_1
-vdc Spine_1 id 1
+hostname Spine_2
+vdc Spine_2 id 1
   limit-resource vlan minimum 16 maximum 4094
   limit-resource vrf minimum 2 maximum 4096
   limit-resource port-channel minimum 0 maximum 511
@@ -22,10 +22,10 @@ feature isis
 feature bfd
 
 no password strength-check
-username admin password 5 $5$LAPKHE$wO.YNFINsof2e/lchFvJoGHQpZLNF303q6VxmHh6tM9  role network-admin
+username admin password 5 $5$CFIKAJ$N5FLGk4f8eb4ibnu3BHyoMqcrN9AmFpIC7HhsNEFLN2  role network-admin
 ip domain-lookup
 copp profile strict
-snmp-server user admin network-admin auth md5 1759EF169E17E9ECFC3D24476F1EC5B9299C priv 367E8348C738D2CCD21F375601DE4B74B6A5 localizedV2key
+snmp-server user admin network-admin auth md5 00540F1A99AC95CCDCBE150151235CBFB5A9 priv 1779671882BEC3EEF2AD4D1213660F8CE6BA localizedV2key
 rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
 rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
 rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
@@ -34,7 +34,7 @@ rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
 vlan 1
 
-ip prefix-list pl_connected seq 5 permit 10.0.0.4/32 
+ip prefix-list pl_connected seq 5 permit 10.0.0.5/32 
 route-map leafs permit 10
   match as-number 4200000001-4200000003 
 route-map next-hop-unchanged permit 10
@@ -45,11 +45,11 @@ vrf context management
 
 
 interface Ethernet1/1
-  description -M- | Spine_1 to Leaf_1 | PTP
+  description -M- | Spine_2 to Leaf_1 | PTP
   no switchport
   mtu 9216
   no ip redirects
-  ip address 172.16.0.1/31
+  ip address 172.16.0.3/31
   no ipv6 redirects
   no isis hello-padding always
   isis network point-to-point
@@ -60,11 +60,11 @@ interface Ethernet1/1
   no shutdown
 
 interface Ethernet1/2
-  description -M- | Spine_1 to Leaf_2 | PTP
+  description -M- | Spine_2 to Leaf_2 | PTP
   no switchport
   mtu 9216
   no ip redirects
-  ip address 172.16.0.5/31
+  ip address 172.16.0.7/31
   no ipv6 redirects
   no isis hello-padding always
   isis network point-to-point
@@ -75,11 +75,11 @@ interface Ethernet1/2
   no shutdown
 
 interface Ethernet1/3
-  description -M- | Spine_1 to Leaf_3 | PTP
+  description -M- | Spine_2 to Leaf_3 | PTP
   no switchport
   mtu 9216
   no ip redirects
-  ip address 172.16.0.9/31
+  ip address 172.16.0.11/31
   no ipv6 redirects
   no isis hello-padding always
   isis network point-to-point
@@ -277,7 +277,7 @@ interface mgmt0
 
 interface loopback0
   description -L- | Router ID | Loopback
-  ip address 10.0.0.4/32
+  ip address 10.0.0.5/32
   ip router isis 100
   ip router ospf 100 area 0.0.0.0
 icam monitor scale
@@ -285,20 +285,20 @@ icam monitor scale
 line console
 line vty
 router ospf 100
-  router-id 10.0.0.4
+  router-id 10.0.0.5
   log-adjacency-changes detail
-  area 0.0.0.0 range 10.0.0.4/32
-  area 0.0.0.0 range 172.16.0.0/31
-  area 0.0.0.0 range 172.16.0.4/31
-  area 0.0.0.0 range 172.16.0.8/31
+  area 0.0.0.0 range 10.0.0.5/32
+  area 0.0.0.0 range 172.16.0.2/31
+  area 0.0.0.0 range 172.16.0.6/31
+  area 0.0.0.0 range 172.16.0.10/31
   shutdown
   passive-interface default
 router isis 100
   shutdown
-  net 49.0001.0100.0000.0004.00
+  net 49.0001.0100.0000.0005.00
   log-adjacency-changes
 router bgp 64086.59904
-  router-id 10.0.0.4
+  router-id 10.0.0.5
   bestpath as-path multipath-relax
   reconnect-interval 5
   log-neighbor-changes

@@ -1,12 +1,12 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Sat Aug 12 18:29:23 2023
-!Time: Sat Aug 12 18:29:23 2023
+!Running configuration last done at: Sat Aug 12 20:33:24 2023
+!Time: Sat Aug 12 20:33:24 2023
 
 version 9.3(10) Bios:version  
-hostname Spine_1
-vdc Spine_1 id 1
+hostname Leaf_3
+vdc Leaf_3 id 1
   limit-resource vlan minimum 16 maximum 4094
   limit-resource vrf minimum 2 maximum 4096
   limit-resource port-channel minimum 0 maximum 511
@@ -19,37 +19,98 @@ nv overlay evpn
 feature ospf
 feature bgp
 feature isis
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
 feature bfd
+feature nv overlay
 
-no password strength-check
-username admin password 5 $5$LAPKHE$wO.YNFINsof2e/lchFvJoGHQpZLNF303q6VxmHh6tM9  role network-admin
+username admin password 5 $5$OMHEFI$snZD337kHsF2M8GpKqyh.SuT.g1sRpkb29Slrnw1W5D  role network-admin
 ip domain-lookup
 copp profile strict
-snmp-server user admin network-admin auth md5 1759EF169E17E9ECFC3D24476F1EC5B9299C priv 367E8348C738D2CCD21F375601DE4B74B6A5 localizedV2key
+snmp-server user admin network-admin auth md5 217528C1609762FC5C73F515F21AB9325D7C priv 01620CF57CC257CF5E0DC352B35EDF394023 localizedV2key
 rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
 rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
 rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
 rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
 rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
 
-vlan 1
+fabric forwarding anycast-gateway-mac 0000.0000.7777
+vlan 1,100,200,300,777
+vlan 100
+  vn-segment 10100
+vlan 200
+  vn-segment 10200
+vlan 300
+  vn-segment 10300
+vlan 777
+  vn-segment 7777
 
-ip prefix-list pl_connected seq 5 permit 10.0.0.4/32 
-route-map leafs permit 10
-  match as-number 4200000001-4200000003 
-route-map next-hop-unchanged permit 10
-  set ip next-hop unchanged
+ip prefix-list pl_client_3 seq 5 permit 192.168.3.0/24 
+ip prefix-list pl_connected seq 5 permit 10.0.0.3/32 
+route-map rm_client_3 permit 10
+  match ip address prefix-list pl_client_3 
 route-map rm_connected permit 10
   match ip address prefix-list pl_connected 
+vrf context Leafs_L3VNI
+  vni 7777
+  rd 10.0.0.3:7777
+  address-family ipv4 unicast
+    route-target import 4200000001:7777 evpn
+    route-target import 4200000002:7777 evpn
+    route-target import 4200000003:7777 evpn
+    route-target export 4200000003:7777 evpn
 vrf context management
+hardware access-list tcam region racl 512
+hardware access-list tcam region arp-ether 256 double-wide
 
+
+interface Vlan1
+
+interface Vlan100
+  description VPCS_1_GW
+  no shutdown
+  vrf member Leafs_L3VNI
+  ip address 192.168.1.254/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan200
+  description VPCS_2_GW
+  no shutdown
+  vrf member Leafs_L3VNI
+  ip address 192.168.2.254/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan777
+  description Leafs_L3VNI
+  no shutdown
+  vrf member Leafs_L3VNI
+  no ip redirects
+  ip forward
+  ipv6 forward
+  no ipv6 redirects
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 7777 associate-vrf
+  member vni 10100
+    suppress-arp
+    ingress-replication protocol bgp
+  member vni 10200
+    suppress-arp
+    ingress-replication protocol bgp
+  member vni 10300
+    suppress-arp
+    ingress-replication protocol bgp
 
 interface Ethernet1/1
-  description -M- | Spine_1 to Leaf_1 | PTP
+  description -M- | Leaf_3 to Spine_1 | PTP
   no switchport
   mtu 9216
   no ip redirects
-  ip address 172.16.0.1/31
+  ip address 172.16.0.8/31
   no ipv6 redirects
   no isis hello-padding always
   isis network point-to-point
@@ -60,11 +121,11 @@ interface Ethernet1/1
   no shutdown
 
 interface Ethernet1/2
-  description -M- | Spine_1 to Leaf_2 | PTP
+  description -M- | Leaf_3 to Spine_2 | PTP
   no switchport
   mtu 9216
   no ip redirects
-  ip address 172.16.0.5/31
+  ip address 172.16.0.10/31
   no ipv6 redirects
   no isis hello-padding always
   isis network point-to-point
@@ -75,19 +136,7 @@ interface Ethernet1/2
   no shutdown
 
 interface Ethernet1/3
-  description -M- | Spine_1 to Leaf_3 | PTP
-  no switchport
-  mtu 9216
-  no ip redirects
-  ip address 172.16.0.9/31
-  no ipv6 redirects
-  no isis hello-padding always
-  isis network point-to-point
-  ip router isis 100
-  ip ospf network point-to-point
-  no ip ospf passive-interface
-  ip router ospf 100 area 0.0.0.0
-  no shutdown
+  shutdown
 
 interface Ethernet1/4
   shutdown
@@ -111,13 +160,16 @@ interface Ethernet1/10
   shutdown
 
 interface Ethernet1/11
-  shutdown
+  description -C- | VPC_3_HQ | Clients
+  switchport access vlan 100
 
 interface Ethernet1/12
-  shutdown
+  description -C- | VPC_3_Prod | Clients
+  switchport access vlan 200
 
 interface Ethernet1/13
-  shutdown
+  description -C- | VPC_3_Dev | Clients
+  switchport access vlan 300
 
 interface Ethernet1/14
   shutdown
@@ -277,7 +329,7 @@ interface mgmt0
 
 interface loopback0
   description -L- | Router ID | Loopback
-  ip address 10.0.0.4/32
+  ip address 10.0.0.3/32
   ip router isis 100
   ip router ospf 100 area 0.0.0.0
 icam monitor scale
@@ -285,39 +337,63 @@ icam monitor scale
 line console
 line vty
 router ospf 100
-  router-id 10.0.0.4
+  router-id 10.0.0.3
   log-adjacency-changes detail
-  area 0.0.0.0 range 10.0.0.4/32
-  area 0.0.0.0 range 172.16.0.0/31
-  area 0.0.0.0 range 172.16.0.4/31
+  area 0.0.0.0 range 10.0.0.3/32
   area 0.0.0.0 range 172.16.0.8/31
+  area 0.0.0.0 range 172.16.0.10/31
   shutdown
   passive-interface default
 router isis 100
   shutdown
-  net 49.0001.0100.0000.0004.00
+  net 49.0001.0100.0000.0003.00
+  is-type level-1
   log-adjacency-changes
-router bgp 64086.59904
-  router-id 10.0.0.4
+router bgp 64086.59907
+  router-id 10.0.0.3
   bestpath as-path multipath-relax
   reconnect-interval 5
   log-neighbor-changes
   address-family ipv4 unicast
     redistribute direct route-map rm_connected
     maximum-paths 64
-  address-family l2vpn evpn
-    retain route-target all
-  neighbor 10.0.0.0/30 remote-as route-map leafs
+  template peer Overlay
+    remote-as 64086.59904
     update-source loopback0
+    ebgp-multihop 2
     address-family l2vpn evpn
       send-community
       send-community extended
-      route-map next-hop-unchanged out
-  neighbor 172.16.0.0/28 remote-as route-map leafs
+  template peer Spines
+    remote-as 64086.59904
     password 3 7b12be5a1d75eaf0
     timers 5 15
-    maximum-peers 3
     address-family ipv4 unicast
+  neighbor 10.0.0.4
+    inherit peer Overlay
+    description Spine_1_overlay
+  neighbor 10.0.0.5
+    inherit peer Overlay
+    description Spine_2_overlay
+  neighbor 172.16.0.9
+    inherit peer Spines
+    description Spine_1
+  neighbor 172.16.0.11
+    inherit peer Spines
+    description Spine_2
+evpn
+  vni 10100 l2
+    rd 10.0.0.3:100
+    route-target import 10100:100
+    route-target export 10100:100
+  vni 10200 l2
+    rd 10.0.0.3:200
+    route-target import 10200:200
+    route-target export 10200:200
+  vni 10300 l2
+    rd 10.0.0.3:300
+    route-target import 10300:300
+    route-target export 10300:300
 
 
 !

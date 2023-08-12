@@ -1,8 +1,8 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Mon Jul 17 01:35:04 2023
-!Time: Mon Jul 17 01:35:05 2023
+!Running configuration last done at: Sat Aug 12 18:29:23 2023
+!Time: Sat Aug 12 18:29:23 2023
 
 version 9.3(10) Bios:version  
 hostname Spine_1
@@ -280,10 +280,6 @@ interface loopback0
   ip address 10.0.0.4/32
   ip router isis 100
   ip router ospf 100 area 0.0.0.0
-
-interface loopback1
-  description -L- | Overlay IP | Loopback
-  ip address 10.0.1.4/32
 icam monitor scale
 
 line console
