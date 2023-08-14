@@ -13,10 +13,11 @@
 11) Проверить состояние port-channel клиента Client_Router.
 12) Настроить eBGP пиринг на Client_Router до Leaf_1 и Leaf_2 и анонсировать клиентскую сеть 192.168.4.0/24.
 13) Настроить eBGP пиринг от Leaf_1 и Leaf_2 до Client_Router и анонсировать маршрут по умолчанию.
-14) Проверить BGP обновления на Client_Router для маршрута по умолчанию. 
-14) Проверить BGP обновление с evpn route-type 5 сети Client_Router на Spine от Anycast VTEP адреса vPC домена.
-15) Проверить установку BGP обновления в L3RIB Leaf_3.
-16) Проверить сетевую связность между клиентом Leaf_3 и Client_Router сетью.
+14) Проверить BGP обновления на Client_Router для маршрута по умолчанию.
+15) Проверить BGP обновления на Leaf_1 и Leaf_2 для сети 192.168.4.0/24.
+16) Проверить BGP обновление с evpn route-type 5 сети Client_Router на Spine от Anycast VTEP адреса vPC домена.
+17) Проверить установку BGP обновления в L3RIB Leaf_3.
+18) Проверить сетевую связность между клиентом Leaf_3 и Client_Router сетью.
 # Целевая схема
 ![Снимок](https://github.com/Anumrak/EVPN_labs/assets/133969023/090ab0fd-c540-4503-8934-4834c4fd1294)
 
@@ -319,12 +320,12 @@ router bgp 64512
 
 Напротив мак адреса клиента нет звездочки, то есть он не активный и пройти он дальше к Leaf_1 не сможет. Иначе получится петля.
 Чтобы изменить это поведение, можно использовать функцию маршрутизации от SVI интерфейса используемого vlan, внутри которого ходит трафик между peer-link'ами. Включаем эту функцию командой peer-gateway внутри vPC домена. Но и это еще не все. Так как тарфик внутри peer-link теперь маршрутизируется, значит кроме подмены мак адресов источника он теперь еще и TTL уменьшает.
-На скриншоте видно, что мак адрес источника клиента изменился на системный мак адрес Leaf_2 после прохождения такого пакета через peer-link
+На скриншоте видно, что мак адрес источника клиента изменился на системный мак адрес Leaf_2 после прохождения такого пакета через peer-link:
 
 ![Снимок2](https://github.com/Anumrak/EVPN_labs/assets/133969023/7435f508-1584-42a5-ba97-48df952f0515)
 ![Снимок](https://github.com/Anumrak/EVPN_labs/assets/133969023/39bf6d1e-0016-4d37-9762-b6b91fcaaa2a)
 
-Первое нам крайне важно (подмена мак адресов источника), а вот от второго нужно избавиться. Тут есть два пути: в настройках BGP пиринга указываем дополнительную команду eBGP multihop, либо в vPC домене указываем дополнительную команду layer3 peer-router, которая позволяет не вычитать значения ttl в пакетах, проходящих через peer-link. Я предпочитаю второе, потому что эта функция в vPC именно для этого и предназначена, зачем вмешиваться в BGP конфиг, особенно клиентам.
+Первое нам крайне важно (подмена мак адресов источника), а вот от второго нужно избавиться. Тут есть два пути: в настройках BGP пиринга указываем дополнительную команду ebgp-multihop 2, либо в vPC домене указываем дополнительную команду layer3 peer-router, которая позволяет не вычитать значения ttl в пакетах, проходящих через peer-link. Я предпочитаю второе, потому что эта функция в vPC именно для этого и предназначена, зачем вмешиваться в BGP конфиг, особенно клиентам.
 
 ![Снимок4](https://github.com/Anumrak/EVPN_labs/assets/133969023/d9675d2f-97e1-49cb-95a4-eb6fb5a9d94f)
 
@@ -379,6 +380,11 @@ router bgp 64086.59905
 ```
 ### Проверка BGP обновления на Client_Router для маршрута по умолчанию
 ```
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+192.168.50.1    4   4200000001     121     135        5    0    0 01:56:30        1
+192.168.50.2    4   4200000002     121     133        5    0    0 01:56:30        1
+```
+```
 Client_Router#sh ip bgp
 BGP table version is 4, local router ID is 10.100.100.100
 Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
@@ -405,6 +411,37 @@ C        192.168.50.0/29 is directly connected, Vlan400
 L        192.168.50.3/32 is directly connected, Vlan400
 ```
 Оба маршрута в bgp таблице, но только один в L3RIB, до пира с наименьшим IP адресом. Этот роутер (I86BI_LINUXL2-ADVENTERPRISEK9-M), Version 15.2 не умеет работать с функционалом bestpath as-path relax, к сожалению.
+### Проверка BGP обновления на Leaf_1 и Leaf_2 для сети 192.168.4.0/24
+```
+Leaf_1# sh ip bgp vrf Leafs_L3VNI | i 192.168.4.0
+*>e192.168.4.0/24     192.168.50.3             0                     0 64512 i
+```
+```
+Leaf_1# sh ip route 192.168.4.0 vrf Leafs_L3VNI
+IP Route Table for VRF "Leafs_L3VNI"
+'*' denotes best ucast next-hop
+'**' denotes best mcast next-hop
+'[x/y]' denotes [preference/metric]
+'%<string>' in via output denotes VRF <string>
+
+192.168.4.0/24, ubest/mbest: 1/0
+    *via 192.168.50.3, [20/0], 02:00:03, bgp-64086.59905, external, tag 64512
+```
+```
+Leaf_2# sh ip bgp vrf Leafs_L3VNI | i 192.168.4.0
+*>e192.168.4.0/24     192.168.50.3             0                     0 64512 i
+```
+```
+Leaf_2# sh ip route 192.168.4.0 vrf Leafs_L3VNI
+IP Route Table for VRF "Leafs_L3VNI"
+'*' denotes best ucast next-hop
+'**' denotes best mcast next-hop
+'[x/y]' denotes [preference/metric]
+'%<string>' in via output denotes VRF <string>
+
+192.168.4.0/24, ubest/mbest: 1/0
+    *via 192.168.50.3, [20/0], 02:04:44, bgp-64086.59906, external, tag 64512
+```
 ### Проверка BGP обновления с evpn route-type 5 сети Client_Router на Spine от Anycast VTEP адреса vPC домена
 ```
 Route Distinguisher: 10.0.0.1:7777
