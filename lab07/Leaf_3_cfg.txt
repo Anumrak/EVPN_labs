@@ -1,8 +1,8 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Sat Aug 12 20:33:24 2023
-!Time: Sat Aug 12 20:33:24 2023
+!Running configuration last done at: Mon Aug 14 17:23:04 2023
+!Time: Mon Aug 14 17:23:05 2023
 
 version 9.3(10) Bios:version  
 hostname Leaf_3
@@ -46,10 +46,7 @@ vlan 300
 vlan 777
   vn-segment 7777
 
-ip prefix-list pl_client_3 seq 5 permit 192.168.3.0/24 
 ip prefix-list pl_connected seq 5 permit 10.0.0.3/32 
-route-map rm_client_3 permit 10
-  match ip address prefix-list pl_client_3 
 route-map rm_connected permit 10
   match ip address prefix-list pl_connected 
 vrf context Leafs_L3VNI

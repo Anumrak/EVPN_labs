@@ -1,8 +1,8 @@
 
 
 !Command: show running-config
-!Running configuration last done at: Sat Aug 12 23:03:06 2023
-!Time: Sat Aug 12 23:03:07 2023
+!Running configuration last done at: Mon Aug 14 17:23:30 2023
+!Time: Mon Aug 14 17:23:31 2023
 
 version 9.3(10) Bios:version  
 hostname Leaf_2
@@ -50,13 +50,13 @@ vlan 300
 vlan 777
   vn-segment 7777
 
+ip prefix-list pl_client seq 5 permit 0.0.0.0/0 
 ip prefix-list pl_connected seq 5 permit 10.0.0.2/32 
 ip prefix-list pl_connected seq 10 permit 10.1.0.1/32 
-ip prefix-list pl_prod seq 5 permit 192.168.2.0/24 
+route-map rm_client permit 10
+  match ip address prefix-list pl_client 
 route-map rm_connected permit 10
   match ip address prefix-list pl_connected 
-route-map rm_prod permit 10
-  match ip address prefix-list pl_prod 
 vrf context Keepalive
 vrf context Leafs_L3VNI
   vni 7777
@@ -72,6 +72,8 @@ hardware access-list tcam region racl 512
 hardware access-list tcam region arp-ether 256 double-wide
 vpc domain 1
   peer-keepalive destination 192.168.255.0 source 192.168.255.1 vrf Keepalive
+  peer-gateway
+  layer3 peer-router
   ip arp synchronize
 
 
@@ -83,7 +85,9 @@ interface Vlan100
   description VPCS_1_GW
   no shutdown
   vrf member Leafs_L3VNI
+  no ip redirects
   ip address 192.168.1.254/24
+  no ipv6 redirects
   fabric forwarding mode anycast-gateway
 
 interface Vlan200
@@ -96,11 +100,12 @@ interface Vlan200
   fabric forwarding mode anycast-gateway
 
 interface Vlan400
-  description Client_Router_GW
+  description -C- | Client_Router eBGP session Leaf_2 | Clients
   no shutdown
   vrf member Leafs_L3VNI
-  ip address 192.168.4.254/24
-  fabric forwarding mode anycast-gateway
+  no ip redirects
+  ip address 192.168.50.2/29
+  no ipv6 redirects
 
 interface Vlan777
   description Leafs_L3VNI
@@ -427,7 +432,10 @@ router bgp 64086.59906
   vrf Leafs_L3VNI
     address-family ipv4 unicast
       network 0.0.0.0/0
-      network 192.168.4.0/24
+    neighbor 192.168.50.3
+      remote-as 64512
+      address-family ipv4 unicast
+        route-map rm_client out
 evpn
   vni 10100 l2
     rd 10.0.0.2:100
