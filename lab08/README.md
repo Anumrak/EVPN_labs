@@ -493,6 +493,7 @@ Flags: (0x000202) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
       Received label 10100 7777
       Extcommunity: RT:10100:100 RT:4200000003:7777 ENCAP:8 Router MAC:5003.0000.1b08
 ```
+```
 VPCS> trace 2023:A5E2:8C12:400::1
 
 trace to 2023:A5E2:8C12:400::1, 64 hops max
