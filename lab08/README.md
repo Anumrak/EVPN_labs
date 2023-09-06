@@ -1,6 +1,15 @@
 # Настройка underlay сети в CLOS топологии из пяти устройств Cisco Nexus 9k. (VXLAN over MP-BGP EVPN IPv6 version)
 Цели
-1) 
+1) Настройка IPv6 адресации для пиринга через vPC линк с клиентом.
+2) Настройка IPv6 anycast шлюзов для клиентов фабрики.
+3) Настройка eBGP для IPv6 маршрутов и для фабрики, и для клиента в vPC домене.
+4) Настройка клиентского роутера для IPv6 связности через eBGP пиринг с vPC доменом.
+5) Проверка состояния пиринга на Leaf_1.
+6) Проверка экспорта AF IPv6 в AF L2VPN SAFI EVPN как route-type 5.
+7) Проверка route-type 5 маршрутов от vPC домена на Spine_1.
+8) Проверка импорта route-type 5 маршрутов на Leaf_3.
+9) Проверка доступности IPv6 хостов через EVPN фабрику от клиента Leaf_3 до шлюза подсети Client_Router.
+10) Обратная проверка доступности от шлюза Client_Router до клиента фабрики.
 # Целевая схема
 ![Снимок](https://github.com/Anumrak/EVPN_labs/assets/133969023/090ab0fd-c540-4503-8934-4834c4fd1294)
 
@@ -274,7 +283,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn
 
 ![ipv6_prefix_bgp_update](https://github.com/Anumrak/EVPN_labs/assets/133969023/be5690ff-30c5-4ef7-a8fe-53cabd4fa8d9)
 
-### Проверка route-type 5 от vPC домена на Spine_1 как примерном
+### Проверка route-type 5 маршрутов от vPC домена на Spine_1 как примерном
 ```
 Route Distinguisher: 10.0.0.1:7777
 *>e[5]:[0]:[0]:[0]:[0.0.0.0]/224
@@ -288,7 +297,7 @@ Route Distinguisher: 10.0.0.1:7777
 ```
 Опять же, очень удобно, что на спайнах ничего настраивать не нужно, ведь эти IPv6 префиксы известны все также как SAFI EVPN в виде route-type 5.
 
-### Проверка импорта EVPN route-type 5 маршрутов на Leaf_3
+### Проверка импорта route-type 5 маршрутов на Leaf_3
 ```
 Route Distinguisher: 10.0.0.3:7777    (L3VNI 7777)
 *>e[2]:[0]:[0]:[48]:[0050.7966.6806]:[32]:[192.168.1.1]/272
@@ -434,7 +443,7 @@ IPv6 Routing Table for VRF "Leafs_L3VNI"
     *via ::ffff:10.1.0.1%default:IPv4, [20/0], 00:45:33, bgp-64086.59907, external, tag 4200000000,
 segid 7777 tunnelid: 0xa010001 encap: VXLAN
 ```
-### Проверка доступности IPv6 хостов через EVPN фабрику от клиента Leaf_3 до клиента подсети Client_Router
+### Проверка доступности IPv6 хостов через EVPN фабрику от клиента Leaf_3 до шлюза подсети Client_Router
 ```
 VPCS> sh ipv6
 
@@ -462,7 +471,7 @@ VPCS> ping 2023:A5E2:8C12:400::1
 
 Похоже на IPv6 over IPv4, но все же это просто универсальный VXLAN оверлей благодаря control plane BGP EVPN :)
 
-### Проверка обратного роутинга от публичного шлюза Client_Router до клиента фабрики
+### Обратная проверка доступности от шлюза Client_Router до клиента фабрики
 ```
 Client_Router#ping 2023:1eaf:100:0:192:168:1:3 source 2023:A5E2:8C12:400::1
 Type escape sequence to abort.
@@ -471,7 +480,7 @@ Packet sent with a source address of 2023:A5E2:8C12:400::1
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 17/22/32 ms
 ```
-Кстати, обратно нам приходят ответы только потому, что vPC домен в курсе об обратном маршруте через full mac-ip route-type 2 через L3VNI форвардинг
+Кстати, обратно нам приходят ответы только потому, что vPC домен в курсе об обратном маршруте через full mac-ip route-type 2 через L3VNI форвардинг.
 ```
 2023:1eaf:100:0:192:168:1:3/128, ubest/mbest: 1/0
     *via ::ffff:10.0.0.3%default:IPv4, [20/0], 00:00:08, bgp-64086.59905, external, tag 4200000000,
