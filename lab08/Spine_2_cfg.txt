@@ -1,0 +1,327 @@
+
+
+!Command: show running-config
+!Running configuration last done at: Wed Sep  6 12:31:41 2023
+!Time: Wed Sep  6 12:31:42 2023
+
+version 9.3(10) Bios:version  
+hostname Spine_2
+vdc Spine_2 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+nv overlay evpn
+feature ospf
+feature bgp
+feature isis
+feature bfd
+
+no password strength-check
+username admin password 5 $5$CFIKAJ$N5FLGk4f8eb4ibnu3BHyoMqcrN9AmFpIC7HhsNEFLN2  role network-admin
+ip domain-lookup
+copp profile strict
+snmp-server user admin network-admin auth md5 00540F1A99AC95CCDCBE150151235CBFB5A9 priv 1779671882BEC3EEF2AD4D1213660F8CE6BA localizedV2key
+rmon event 1 log trap public description FATAL(1) owner PMON@FATAL
+rmon event 2 log trap public description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 log trap public description ERROR(3) owner PMON@ERROR
+rmon event 4 log trap public description WARNING(4) owner PMON@WARNING
+rmon event 5 log trap public description INFORMATION(5) owner PMON@INFO
+
+vlan 1
+
+ip prefix-list pl_connected seq 5 permit 10.0.0.5/32 
+route-map leafs permit 10
+  match as-number 4200000001-4200000003 
+route-map next-hop-unchanged permit 10
+  set ip next-hop unchanged
+route-map rm_connected permit 10
+  match ip address prefix-list pl_connected 
+vrf context management
+
+
+interface Ethernet1/1
+  description -M- | Spine_2 to Leaf_1 | PTP
+  no switchport
+  mtu 9216
+  no ip redirects
+  ip address 172.16.0.3/31
+  no ipv6 redirects
+  no isis hello-padding always
+  isis network point-to-point
+  ip router isis 100
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf 100 area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/2
+  description -M- | Spine_2 to Leaf_2 | PTP
+  no switchport
+  mtu 9216
+  no ip redirects
+  ip address 172.16.0.7/31
+  no ipv6 redirects
+  no isis hello-padding always
+  isis network point-to-point
+  ip router isis 100
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf 100 area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/3
+  description -M- | Spine_2 to Leaf_3 | PTP
+  no switchport
+  mtu 9216
+  no ip redirects
+  ip address 172.16.0.11/31
+  no ipv6 redirects
+  no isis hello-padding always
+  isis network point-to-point
+  ip router isis 100
+  ip ospf network point-to-point
+  no ip ospf passive-interface
+  ip router ospf 100 area 0.0.0.0
+  no shutdown
+
+interface Ethernet1/4
+  shutdown
+
+interface Ethernet1/5
+  shutdown
+
+interface Ethernet1/6
+  shutdown
+
+interface Ethernet1/7
+  shutdown
+
+interface Ethernet1/8
+  shutdown
+
+interface Ethernet1/9
+  shutdown
+
+interface Ethernet1/10
+  shutdown
+
+interface Ethernet1/11
+  shutdown
+
+interface Ethernet1/12
+  shutdown
+
+interface Ethernet1/13
+  shutdown
+
+interface Ethernet1/14
+  shutdown
+
+interface Ethernet1/15
+  shutdown
+
+interface Ethernet1/16
+  shutdown
+
+interface Ethernet1/17
+  shutdown
+
+interface Ethernet1/18
+  shutdown
+
+interface Ethernet1/19
+  shutdown
+
+interface Ethernet1/20
+  shutdown
+
+interface Ethernet1/21
+  shutdown
+
+interface Ethernet1/22
+  shutdown
+
+interface Ethernet1/23
+  shutdown
+
+interface Ethernet1/24
+  shutdown
+
+interface Ethernet1/25
+  shutdown
+
+interface Ethernet1/26
+  shutdown
+
+interface Ethernet1/27
+  shutdown
+
+interface Ethernet1/28
+  shutdown
+
+interface Ethernet1/29
+  shutdown
+
+interface Ethernet1/30
+  shutdown
+
+interface Ethernet1/31
+  shutdown
+
+interface Ethernet1/32
+  shutdown
+
+interface Ethernet1/33
+  shutdown
+
+interface Ethernet1/34
+  shutdown
+
+interface Ethernet1/35
+  shutdown
+
+interface Ethernet1/36
+  shutdown
+
+interface Ethernet1/37
+  shutdown
+
+interface Ethernet1/38
+  shutdown
+
+interface Ethernet1/39
+  shutdown
+
+interface Ethernet1/40
+  shutdown
+
+interface Ethernet1/41
+  shutdown
+
+interface Ethernet1/42
+  shutdown
+
+interface Ethernet1/43
+  shutdown
+
+interface Ethernet1/44
+  shutdown
+
+interface Ethernet1/45
+  shutdown
+
+interface Ethernet1/46
+  shutdown
+
+interface Ethernet1/47
+  shutdown
+
+interface Ethernet1/48
+  shutdown
+
+interface Ethernet1/49
+  shutdown
+
+interface Ethernet1/50
+  shutdown
+
+interface Ethernet1/51
+  shutdown
+
+interface Ethernet1/52
+  shutdown
+
+interface Ethernet1/53
+  shutdown
+
+interface Ethernet1/54
+  shutdown
+
+interface Ethernet1/55
+  shutdown
+
+interface Ethernet1/56
+  shutdown
+
+interface Ethernet1/57
+  shutdown
+
+interface Ethernet1/58
+  shutdown
+
+interface Ethernet1/59
+  shutdown
+
+interface Ethernet1/60
+  shutdown
+
+interface Ethernet1/61
+  shutdown
+
+interface Ethernet1/62
+  shutdown
+
+interface Ethernet1/63
+  shutdown
+
+interface Ethernet1/64
+  shutdown
+
+interface mgmt0
+  vrf member management
+
+interface loopback0
+  description -L- | Router ID | Loopback
+  ip address 10.0.0.5/32
+  ip router isis 100
+  ip router ospf 100 area 0.0.0.0
+icam monitor scale
+
+line console
+line vty
+router ospf 100
+  router-id 10.0.0.5
+  log-adjacency-changes detail
+  area 0.0.0.0 range 10.0.0.5/32
+  area 0.0.0.0 range 172.16.0.2/31
+  area 0.0.0.0 range 172.16.0.6/31
+  area 0.0.0.0 range 172.16.0.10/31
+  shutdown
+  passive-interface default
+router isis 100
+  shutdown
+  net 49.0001.0100.0000.0005.00
+  log-adjacency-changes
+router bgp 64086.59904
+  router-id 10.0.0.5
+  bestpath as-path multipath-relax
+  reconnect-interval 5
+  log-neighbor-changes
+  address-family ipv4 unicast
+    redistribute direct route-map rm_connected
+    maximum-paths 64
+  address-family l2vpn evpn
+    retain route-target all
+  neighbor 10.0.0.0/30 remote-as route-map leafs
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map next-hop-unchanged out
+  neighbor 172.16.0.0/28 remote-as route-map leafs
+    password 3 7b12be5a1d75eaf0
+    timers 5 15
+    maximum-peers 3
+    address-family ipv4 unicast
+
+
+!
+
+
+!end
+!end
