@@ -259,6 +259,22 @@ Origin codes: i - IGP, e - EGP, ? - incomplete, | - multipath, & - backup, 2 - b
 ```
 ### Проверка экспорта AF IPv6 в AF L2VPN SAFI EVPN как route-type 5
 ```
+Leaf_1# sh ipv6 bgp 2023:a5e2:8c12:400::/64 vrf Leafs_L3VNI
+BGP routing table information for VRF Leafs_L3VNI, address family IPv6 Unicast
+BGP routing table entry for 2023:a5e2:8c12:400::/64, version 7
+Paths: (1 available, best #1)
+Flags: (0x880c001a) (high32 0x000020) on xmit-list, is in u6rib, is best u6rib route, is in HW, expo
+rted
+  vpn: version 5, (0x00000000100002) on xmit-list
+
+  Advertised path-id 1, VPN AF advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop
+  AS-Path: 64512 , path sourced external to AS
+    fc00:2023::192:168:50:3 (metric 0) from fc00:2023::192:168:50:3 (10.100.100.100)
+      Origin IGP, MED 0, localpref 100, weight 0
+      Extcommunity: RT:23456:7777
+```
+```
 Leaf_1# sh bgp l2vpn evpn 2023:a5e2:8c12:400::
 BGP routing table information for VRF default, address family L2VPN EVPN
 Route Distinguisher: 10.0.0.1:7777    (L3VNI 7777)
@@ -431,7 +447,7 @@ IPv6 Routing Table for VRF "Leafs_L3VNI"
     *via ::ffff:10.1.0.1%default:IPv4, [20/0], 00:45:19, bgp-64086.59907, external, tag 4200000000,
 segid 7777 tunnelid: 0xa010001 encap: VXLAN
 ```
-Маршрут 2000::/3 сообщен в фабрику для того, чтобы хосты смогли ходить на все глобальные юникаст адреса в этом VRF. Это как строгий маршрут по умолчанию: только для глобально маршрутизируемых IPv6 префиксов.
+Маршрут 2000::/3 сообщен в фабрику для того, чтобы хосты смогли ходить на все глобальные юникаст адреса в Интернет в этом VRF, если вдруг появится необходимость ходить на адреса, отличные от специфичного префикса 2023:a5e2:8c12:400::/64. Это как "строгий маршрут по умолчанию": только для глобально маршрутизируемых IPv6 префиксов.
 ```
 Leaf_3# sh ipv6 route 2023:a5e2:8c12:400::/64 vrf Leafs_L3VNI
 IPv6 Routing Table for VRF "Leafs_L3VNI"
