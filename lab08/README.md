@@ -264,7 +264,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn
 Как мы видим, next-hop используется в виде vPC Anycast адреса 10.1.0.1, значит этот префикс известен именно от vPC домена.
 Как выглядит NLRI с этим префиксом в дампе
 
-Картинка_1.
+![ipv6_prefix_bgp_update](https://github.com/Anumrak/EVPN_labs/assets/133969023/be5690ff-30c5-4ef7-a8fe-53cabd4fa8d9)
 
 ### Проверка route-type 5 от vPC домена на Spine_1 как примерном
 ```
@@ -450,7 +450,7 @@ VPCS> ping 2023:A5E2:8C12:400::1
 ```
 Как это выглядит в дампе
 
-Картинка_4
+![icmpv6](https://github.com/Anumrak/EVPN_labs/assets/133969023/5bb830dc-d681-47ef-9e8e-a230b5f01f86)
 
 ### Проверка обратного роутинга от публичного шлюза Client_Router до клиента фабрики
 ```
@@ -513,8 +513,8 @@ A destination node SHOULD send a Destination Unreachable message with
 ```
 На роутере Client_Router нет вышестоящего UDP сервиса, поэтому такой ответ.
 
-Картинка_2
+![trace_port](https://github.com/Anumrak/EVPN_labs/assets/133969023/13c0fb8d-481d-4e7b-8491-9f263502142d)
 
-Картинка_3
+![trace_port_unrch](https://github.com/Anumrak/EVPN_labs/assets/133969023/7f24e340-28e4-4b29-9ebb-69903fa9ab08)
 
 L2VPN функционал к сожалению не работает из-за все того же бага Cisco Nexus 9000v - перехват arp и nd запросов и подставлением своего системного мак адреса. Для IPv4 это лечилось suppress ARP функционалом на NVE интерфейсах, но supress ND не поддерживается 9000v. На реальном оборудовании, как широковещательный ARP трафик, так как мультикаст ND рассылка должна работать штатно, без suppress.
