@@ -266,8 +266,6 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn
 
 ![ipv6_prefix_bgp_update](https://github.com/Anumrak/EVPN_labs/assets/133969023/be5690ff-30c5-4ef7-a8fe-53cabd4fa8d9)
 
-Похоже на IPv6 over IPv4, но все же это просто универсальный VXLAN оверлей благодаря control plane BGP EVPN :)
-
 ### Проверка route-type 5 от vPC домена на Spine_1 как примерном
 ```
 Route Distinguisher: 10.0.0.1:7777
@@ -453,6 +451,8 @@ VPCS> ping 2023:A5E2:8C12:400::1
 Как это выглядит в дампе
 
 ![icmpv6](https://github.com/Anumrak/EVPN_labs/assets/133969023/5bb830dc-d681-47ef-9e8e-a230b5f01f86)
+
+Похоже на IPv6 over IPv4, но все же это просто универсальный VXLAN оверлей благодаря control plane BGP EVPN :)
 
 ### Проверка обратного роутинга от публичного шлюза Client_Router до клиента фабрики
 ```
