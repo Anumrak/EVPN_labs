@@ -7,7 +7,7 @@
 Адресное пространство для link интерфейсов
 
 > 172.16.0.0/24
-111
+
 Адресное пространство для loopback интерфейсов
 
 > 10.0.0.0/24
@@ -265,6 +265,8 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn
 Как выглядит NLRI с этим префиксом в дампе
 
 ![ipv6_prefix_bgp_update](https://github.com/Anumrak/EVPN_labs/assets/133969023/be5690ff-30c5-4ef7-a8fe-53cabd4fa8d9)
+
+Похоже на IPv6 over IPv4, но все же это просто универсальный VXLAN оверлей благодаря control plane BGP EVPN :)
 
 ### Проверка route-type 5 от vPC домена на Spine_1 как примерном
 ```
