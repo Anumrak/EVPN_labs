@@ -272,7 +272,6 @@ rted
   AS-Path: 64512 , path sourced external to AS
     fc00:2023::192:168:50:3 (metric 0) from fc00:2023::192:168:50:3 (10.100.100.100)
       Origin IGP, MED 0, localpref 100, weight 0
-      Extcommunity: RT:23456:7777
 ```
 ```
 Leaf_1# sh bgp l2vpn evpn 2023:a5e2:8c12:400::
